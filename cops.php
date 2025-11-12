@@ -1,11 +1,20 @@
 <?php
 function call_cops(array &$state, array &$events): bool {
+    $chance=rand_range(1,2);
+    if($chance==1)
+    {
+        return false;
+    }
     $wanted = (int)$state['wantedLevel'];
     if ($wanted < 1 || rand_range(0, 4) >= $wanted) {
         return false;
     }
     $events[] = "cops show up!";
-    $cops = max(1, min(3, intval($wanted / 2)));
+        $cops=$wanted/4;
+        if($cops>30)
+        {
+            $cops=30;
+        }
     $copsHealth = 40 * $cops;
     $playerD = rand_range(10, 20) + get_weapon_damage($state['equippedWeapon']);
     while ($copsHealth > 0 && $state['playerHealth'] > 0) {

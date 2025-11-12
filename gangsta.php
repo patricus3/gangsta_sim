@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 header('X-Content-Type-Options: nosniff');
-include 'scripts/spkdf2.php';
+include 'spkdf2.php';
 include 'cops.php';
 $cookieName = 'gangsta_save';
 // Default state
