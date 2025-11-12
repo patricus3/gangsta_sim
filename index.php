@@ -4,7 +4,6 @@ header('X-Content-Type-Options: nosniff');
 include 'spkdf2.php';
 include 'cops.php';
 $cookieName = 'gangsta_save';
-// Default state
 $defaultState = [
     'playerHealth' => 100,
     'playerMaxHealth' => 100,
@@ -312,43 +311,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($rawInput)) {
             break;
 
         case 'attack_bank':
-            if ($state['currentGang'] === 'None') {
-                $events[] = "You need a gang to pull off a bank heist.";
-            } else {
-                $g = null;
-                foreach ($gangs as $gg) if ($gg['Name'] === $state['currentGang']) { $g = $gg; break; }
-                if ($g === null) { $events[] = "Your gang data is missing!"; break; }
-                $events[] = "You and the {$state['currentGang']} storm a bank!";
-                $security = 400;
-                $crewDamage = $g['MemberCount'] * 5;
-                while ($security > 0 && $state['playerHealth'] > 0) {
-                    $playerHit = rand_range(15,25) + get_weapon_damage($state['equippedWeapon']);
-                    $totalHit = $playerHit + $crewDamage;
-                    $security -= $totalHit;
-                    $events[] = "You hit $playerHit and crew adds $crewDamage. Security health: ".max(0,$security).".";
-                    if ($security <= 0) {
-                        $haul = rand_range(1000,2000) + $g['MemberCount'] * 100;
-                        $share = intdiv($haul, ($g['MemberCount'] + 1));
-                        $state['cash'] += $share;
-                        $state['killCount'] += 4;
-                        $state['wantedLevel'] += 3;
-                        $events[] = "Heist success! Your share: \$$share! fuck yeah! Total cash: \${$state['cash']}. Kills +4. Wanted +3.";
-                        call_cops($state,$events);
-                        break;
-                    }
-                    $damage = rand_range(20,34);
-                    $events[] = "Security hits you!";
-                    apply_player_damage($damage, $state, $events, 'security');
-                    if (rand_range(1,100) <= 20) {
-                        $events[] =  "A crew member goes down!";
-                        $crewDamage = max(5, $crewDamage - 5);
-                    }
-                    if ($state['playerHealth'] < 20 && rand_range(1,100) <= 50) {
-                        $events[] ="You and crew bail empty-handed.";
-                        break;
-                    }
-                }
-            }
+          bank_attack($state,$events);
             break;
 
         case 'save':
@@ -423,27 +386,21 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE,
 <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 <body>
-<div class="wrap">
-  <section class="status" aria-labelledby="status-title">
-    <h2 id="status-title">Player Status</h2>
-    <p><strong>Health:</strong> <span id="health"><?=h($state['playerHealth'])?></span>/<span id="maxhealth"><?=h($state['playerMaxHealth'])?></span></p>
-    <p><strong>Cash:</strong> $<span id="cash"><?=h($state['cash'])?></span></p>
-    <p><strong>Equipped Weapon:</strong> <span id="weapon"><?=h($state['equippedWeapon'])?></span></p>
-    <p><strong>Equipped Armor:</strong> <span id="armor"><?=h($state['equippedArmor'])?></span>
-       <?php if (strtolower($state['equippedArmor']) === 'bone armor'): ?>
-         (durability: <span id="boneDur"><?=h($state['boneArmorDurability'])?></span>)
-       <?php endif; ?>
-    </p>
-    <p><strong>Kill Count:</strong> <span id="kills"><?=h($state['killCount'])?></span></p>
-    <p><strong>Wanted Level:</strong> <span id="wanted"><?=h($state['wantedLevel'])?></span></p>
-    <p><strong>Gang:</strong> <span id="gang"><?=h($state['currentGang'])?></span></p>
-    <p><strong>Inventory:</strong> <span id="inv"><?= h(implode(', ', $state['inventory'])) ?></span></p>
-    </section>
-
-  <section class="messages" aria-live="assertive" role="status" id="events">
-    <div id="eventList"><p>Nothing yet. Hit Attack or Steal to start comiting crimes!</p></div>
-  </section>
-
+<section class="status" aria-labelledby="status-title">
+  <h2 id="status-title">Player Status</h2>
+  <span><strong>Health:</strong> <span id="health"><?=h($state['playerHealth'])?></span>/<span id="maxhealth"><?=h($state['playerMaxHealth'])?></span></span>
+  <span><strong>Cash:</strong> $<span id="cash"><?=h($state['cash'])?></span></span>
+  <span><strong>Equipped Weapon:</strong> <span id="weapon"><?=h($state['equippedWeapon'])?></span></span>
+  <span><strong>Equipped Armor:</strong> <span id="armor"><?=h($state['equippedArmor'])?></span>
+    <?php if (strtolower($state['equippedArmor']) === 'bone armor'): ?>
+      (durability: <span id="boneDur"><?=h($state['boneArmorDurability'])?></span>)
+    <?php endif; ?>
+  </span>
+  <span><strong>Kill Count:</strong> <span id="kills"><?=h($state['killCount'])?></span></span>
+  <span><strong>Wanted Level:</strong> <span id="wanted"><?=h($state['wantedLevel'])?></span></span>
+  <span><strong>Gang:</strong> <span id="gang"><?=h($state['currentGang'])?></span></span>
+  <span><strong>Inventory:</strong> <span id="inv"><?= h(implode(', ', $state['inventory'])) ?></span></span>
+</section>
   <nav class="actions" aria-label="Game actions" id="actionRow">
     <button class="primary" onclick="doAction('attack')">Attack</button>
     <button onclick="doAction('steal')">Steal</button>
