@@ -3,6 +3,7 @@ declare(strict_types=1);
 header('X-Content-Type-Options: nosniff');
 include 'spkdf2.php';
 include 'cops.php';
+include 'bank.php';
 $cookieName = 'gangsta_save';
 $defaultState = [
     'playerHealth' => 100,
@@ -386,21 +387,25 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE,
 <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 <body>
-<section class="status" aria-labelledby="status-title">
+  <section class="status">
   <h2 id="status-title">Player Status</h2>
-  <span><strong>Health:</strong> <span id="health"><?=h($state['playerHealth'])?></span>/<span id="maxhealth"><?=h($state['playerMaxHealth'])?></span></span>
-  <span><strong>Cash:</strong> $<span id="cash"><?=h($state['cash'])?></span></span>
-  <span><strong>Equipped Weapon:</strong> <span id="weapon"><?=h($state['equippedWeapon'])?></span></span>
-  <span><strong>Equipped Armor:</strong> <span id="armor"><?=h($state['equippedArmor'])?></span>
+
+  <span class="stat"><strong>Health:</strong>&nbsp;<span id="health"><?=h($state['playerHealth'])?></span>/<span id="maxhealth"><?=h($state['playerMaxHealth'])?></span></span>
+  <span class="stat"><strong>Cash:</strong>&nbsp;$<span id="cash"><?=h($state['cash'])?></span></span>
+  <span class="stat"><strong>Equipped Weapon:</strong>&nbsp;<span id="weapon"><?=h($state['equippedWeapon'])?></span></span>
+  <span class="stat"><strong>Equipped Armor:</strong>&nbsp;<span id="armor"><?=h($state['equippedArmor'])?></span>
     <?php if (strtolower($state['equippedArmor']) === 'bone armor'): ?>
       (durability: <span id="boneDur"><?=h($state['boneArmorDurability'])?></span>)
     <?php endif; ?>
   </span>
-  <span><strong>Kill Count:</strong> <span id="kills"><?=h($state['killCount'])?></span></span>
-  <span><strong>Wanted Level:</strong> <span id="wanted"><?=h($state['wantedLevel'])?></span></span>
-  <span><strong>Gang:</strong> <span id="gang"><?=h($state['currentGang'])?></span></span>
-  <span><strong>Inventory:</strong> <span id="inv"><?= h(implode(', ', $state['inventory'])) ?></span></span>
+  <span class="stat"><strong>Kill Count:</strong>&nbsp;<span id="kills"><?=h($state['killCount'])?></span></span>
+  <span class="stat"><strong>Wanted Level:</strong>&nbsp;<span id="wanted"><?=h($state['wantedLevel'])?></span></span>
+  <span class="stat"><strong>Gang:</strong>&nbsp;<span id="gang"><?=h($state['currentGang'])?></span></span>
+  <span class="stat"><strong>Inventory:</strong>&nbsp;<span id="inv"><?= h(implode(', ', $state['inventory'])) ?></span></span>
 </section>
+<section class="messages" aria-live="assertive" role="status" id="events">
+    <div id="eventList"><p>Nothing yet. Hit Attack or Steal to start comiting crimes!</p></div>
+  </section>
   <nav class="actions" aria-label="Game actions" id="actionRow">
     <button class="primary" onclick="doAction('attack')">Attack</button>
     <button onclick="doAction('steal')">Steal</button>
