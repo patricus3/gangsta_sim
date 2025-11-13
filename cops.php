@@ -1,16 +1,18 @@
 <?php
 function call_cops(array &$state, array &$events): bool {
+    $cop_taunts=[
+"hands up!",
+"we're going to take you down!",
+"get down!",
+"it's police!"
+    ];
     $chance=rand_range(1,2);
-    if($chance==1)
+    if($chance==1&&$state['wantedLevel']<5)
     {
         return false;
     }
-    $wanted = (int)$state['wantedLevel'];
-    if ($wanted < 1 || rand_range(0, 4) >= $wanted) {
-        return false;
-    }
-    $events[] = "cops show up!";
-        $cops=$wanted/4;
+$cops=(int)($state['wantedLevel']/4);
+    $events[] = "$cops cops show up!";
         if($cops>30)
         {
             $cops=30;
@@ -20,7 +22,9 @@ function call_cops(array &$state, array &$events): bool {
     while ($copsHealth > 0 && $state['playerHealth'] > 0) {
         $copsHealth -= $playerD;
         $events[] = "You hit the police for $playerD. Police health: " . max(0, $copsHealth) . ".";
-        if ($copsHealth <= 0) {
+        $taunt=array_rand($cop_taunts);
+        $events[]="a cop shouts: $cop_taunts[$taunt]";
+        if($copsHealth <= 0) {
             $loot2 = rand_range(20, 50);
             $state['cash'] += $loot2;
             $state['killCount'] += $cops;
@@ -41,13 +45,10 @@ function call_cops(array &$state, array &$events): bool {
         $damage = rand_range(5, 15) * $cops;
         $events[] = "Police fire back!";
         apply_player_damage($damage, $state, $events, 'police');
+   $taunt=array_rand($cop_taunts);
+        $events[]="a cop shouts: $cop_taunts[$taunt]";
         if ($state['playerHealth'] <= 0) {
-            // defeated by police => lose 50% cash, arrested briefly
-            $lost = intdiv($state['cash'], 2);
-            $state['cash'] -= $lost;
-            $events[] = "You were defeated by the fucking cops! They cuff you and take \$$lost (50% of your cash). You're arrested briefly.";
-            $state['wantedLevel'] = max(0, $state['wantedLevel'] - 2);
-            $state['playerHealth'] = max(1, intval($state['playerMaxHealth'] * 0.25));
+defeat("cops",$state,$events);
             return true;
         }
         if ($state['playerHealth'] < 20 && rand_range(1, 100) <= 50) {

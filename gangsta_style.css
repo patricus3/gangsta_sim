@@ -25,10 +25,7 @@ header h1 {
   margin-bottom: 1rem;
 }
 
-/* ✅ Critical fix for Brave and screen readers */
 .status span {
-  display: inline;
-  white-space: nowrap; /* prevents splitting label/value onto new lines */
   margin-right: .75rem; /* small visual gap between items */
 }
 
@@ -95,7 +92,6 @@ footer {
   font-size: .9rem;
   color: #9aa;
 }
-
 @media (prefers-color-scheme: light) {
   body {
     background: #fff;

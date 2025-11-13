@@ -4,6 +4,7 @@ header('X-Content-Type-Options: nosniff');
 include 'spkdf2.php';
 include 'cops.php';
 include 'bank.php';
+include 'defeat.php';
 $cookieName = 'gangsta_save';
 $defaultState = [
     'playerHealth' => 100,
@@ -191,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($rawInput)) {
             break;
 
         case 'steal':
-            $pool = ['Knife','Pistol','Bat','Machinegun'];
+            $pool = ['Knife','Pistol','Bat'];
             $pick = $pool[array_rand($pool)];
             $roll = rand_range(1,100);
             $events[] = "You attempt to steal a weapon...";
@@ -382,29 +383,29 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE,
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Gangsta sim(2.1.1)</title>
+<title>Gangsta sim(2.2.0)</title>
 <link rel="stylesheet" href="gangsta_style.css">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 <body>
-  <section class="status">
+<section class="status">
   <h2 id="status-title">Player Status</h2>
-
-  <span class="stat"><strong>Health:</strong>&nbsp;<span id="health"><?=h($state['playerHealth'])?></span>/<span id="maxhealth"><?=h($state['playerMaxHealth'])?></span></span>
-  <span class="stat"><strong>Cash:</strong>&nbsp;$<span id="cash"><?=h($state['cash'])?></span></span>
-  <span class="stat"><strong>Equipped Weapon:</strong>&nbsp;<span id="weapon"><?=h($state['equippedWeapon'])?></span></span>
-  <span class="stat"><strong>Equipped Armor:</strong>&nbsp;<span id="armor"><?=h($state['equippedArmor'])?></span>
+  <span class="stat" id="health">Health: <?=h($state['playerHealth'])?>/<?=h($state['playerMaxHealth'])?></span><br>
+  <span class="stat" id="cash">Cash: $<?=h($state['cash'])?></span><br>
+  <span class="stat" id="weapon">Equipped Weapon: <?=h($state['equippedWeapon'])?></span><br>
+  <span class="stat" id="armor">Equipped Armor: <?=h($state['equippedArmor'])?>
     <?php if (strtolower($state['equippedArmor']) === 'bone armor'): ?>
-      (durability: <span id="boneDur"><?=h($state['boneArmorDurability'])?></span>)
+      (durability: <?=h($state['boneArmorDurability'])?>)
     <?php endif; ?>
-  </span>
-  <span class="stat"><strong>Kill Count:</strong>&nbsp;<span id="kills"><?=h($state['killCount'])?></span></span>
-  <span class="stat"><strong>Wanted Level:</strong>&nbsp;<span id="wanted"><?=h($state['wantedLevel'])?></span></span>
-  <span class="stat"><strong>Gang:</strong>&nbsp;<span id="gang"><?=h($state['currentGang'])?></span></span>
-  <span class="stat"><strong>Inventory:</strong>&nbsp;<span id="inv"><?= h(implode(', ', $state['inventory'])) ?></span></span>
+  </span><br>
+  <span class="stat" id="kills">Kill Count: <?=h($state['killCount'])?></span><br>
+  <span class="stat" id="wanted">Wanted Level: <?=h($state['wantedLevel'])?></span><br>
+  <span class="stat" id="gang">Gang: <?=h($state['currentGang'])?></span><br>
+  <span class="stat" id="inv">Inventory: <?= h(implode(', ', $state['inventory'])) ?></span>
 </section>
 <section class="messages" aria-live="assertive" role="status" id="events">
-    <div id="eventList"><p>Nothing yet. Hit Attack or Steal to start comiting crimes!</p></div>
+<h2>event log</h2>
+<div id="eventList"><p>Nothing yet. Hit Attack or Steal to start comiting crimes!</p></div>
   </section>
   <nav class="actions" aria-label="Game actions" id="actionRow">
     <button class="primary" onclick="doAction('attack')">Attack</button>
@@ -514,12 +515,12 @@ async function doAction(action, extra={}) {
     body: JSON.stringify(payload)
   });
   if (!res.ok) {
-    renderEvents(['Event: Server error ' + res.status]);
+    renderEvents(['Event: Server error! oh fuck! ' + res.status]);
     return;
   }
   const data = await res.json();
   if (!data.ok) {
-    renderEvents(data.events || ['Event: Action failed']);
+    renderEvents(data.events || ['Event: Crash happened, bork!']);
     return;
   }
   if (data.state) {
@@ -532,19 +533,21 @@ async function doAction(action, extra={}) {
   renderEvents(data.events || []);
 }
 
-// update DOM
 function updateUI(s) {
-  document.getElementById('health').textContent = s.playerHealth;
-  document.getElementById('maxhealth').textContent = s.playerMaxHealth;
-  document.getElementById('cash').textContent = s.cash;
-  document.getElementById('weapon').textContent = s.equippedWeapon;
-  document.getElementById('armor').textContent = s.equippedArmor;
-  const boneEl = document.getElementById('boneDur');
-  if (boneEl) boneEl.textContent = s.boneArmorDurability ?? 0;
-  document.getElementById('kills').textContent = s.killCount;
-  document.getElementById('wanted').textContent = s.wantedLevel;
-  document.getElementById('gang').textContent = s.currentGang;
-  document.getElementById('inv').textContent = (s.inventory || []).join(', ');
+  document.getElementById('health').textContent = `Health: ${s.playerHealth}/${s.playerMaxHealth}`;
+  document.getElementById('cash').textContent = `Cash: $${s.cash}`;
+  document.getElementById('weapon').textContent = `Equipped Weapon: ${s.equippedWeapon}`;
+  const armorEl = document.getElementById('armor');
+  if (armorEl) {
+    armorEl.textContent = `Equipped Armor: ${s.equippedArmor}`;
+    if (s.equippedArmor.toLowerCase() === 'bone armor') {
+      armorEl.textContent += ` (durability: ${s.boneArmorDurability ?? 0})`;
+    }
+  }
+  document.getElementById('kills').textContent = `Kill Count: ${s.killCount}`;
+  document.getElementById('wanted').textContent = `Wanted Level: ${s.wantedLevel}`;
+  document.getElementById('gang').textContent = `Gang: ${s.currentGang}`;
+  document.getElementById('inv').textContent = `Inventory: ${(s.inventory || []).join(', ')}`;
   document.getElementById('repairCost').textContent = s.killCount;
 
   // update weapon select
@@ -553,9 +556,14 @@ function updateUI(s) {
   for (const it of (s.inventory || [])) {
     if (getWeaponDamage(it) > 0 || it === 'Fists') {
       const o = document.createElement('option');
-      o.value = it; o.textContent = `${it} (Damage: ${getWeaponDamage(it)})`; ws.appendChild(o);
+      o.value = it;
+      o.textContent = `${it} (Damage: ${getWeaponDamage(it)})`;
+      ws.appendChild(o);
     }
   }
+
+  // update armor select
+
 
   // update armor select
   const as = document.getElementById('armorSelectEquip');
