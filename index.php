@@ -182,11 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($rawInput)) {
                 }
                 if($state["playerHealth"]<=0)
                 {
-                    $lost = intdiv($state['cash'], 2);
-                    $state['cash'] -= $lost;
-                    $events[] = "You were defeated by someone, they called the fucking cops! They cuff you and take \$$lost (50% of your cash). You're arrested briefly.";
-                    $state['wantedLevel'] = max(0, $state['wantedLevel'] - 2);
-                    $state['playerHealth'] = max(1, intval($state['playerMaxHealth'] * 0.25));
+defeat($target);
                 }
             }
             break;
@@ -383,7 +379,7 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE,
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Gangsta sim(2.2.0)</title>
+<title>Gangsta sim(2.2.1)</title>
 <link rel="stylesheet" href="gangsta_style.css">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
