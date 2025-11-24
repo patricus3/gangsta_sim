@@ -150,10 +150,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($rawInput)) {
             $screams = ["Oh no, please don't hurt me!","Somebody help me!","What's wrong with you?!","No, no, no, stay away!","I've got a family, please!","I'm begging you!", "fuck! fuck! fuck!","please, go away!"];
             $target = $civilians[array_rand($civilians)];
             $targetHealth = rand_range(30,50);
-            $playerDamage = rand_range(10,20) + get_weapon_damage($state['equippedWeapon']);
             $events[] = "You spot a $target. You attack with your {$state['equippedWeapon']}!";
             $fled = false;
             while ($targetHealth > 0 && $state['playerHealth'] > 0 && !$fled) {
+                $playerDamage = rand_range(10,20) + get_weapon_damage($state['equippedWeapon']);
                 $targetHealth -= $playerDamage;
                 $events[] = "You hit the $target for $playerDamage damage. Their health: " . max(0,$targetHealth) . ".";
                 $events[] = "The $target screams: \"".$screams[array_rand($screams)]."\"";
@@ -384,7 +384,7 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE,
 <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 <body>
-<section class="status">
+<section class="status" aria-labelledby="status-title">
   <h2 id="status-title">Player Status</h2>
   <span class="stat" id="health">Health: <?=h($state['playerHealth'])?>/<?=h($state['playerMaxHealth'])?></span><br>
   <span class="stat" id="cash">Cash: $<?=h($state['cash'])?></span><br>
@@ -399,8 +399,8 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE,
   <span class="stat" id="gang">Gang: <?=h($state['currentGang'])?></span><br>
   <span class="stat" id="inv">Inventory: <?= h(implode(', ', $state['inventory'])) ?></span>
 </section>
-<section class="messages" aria-live="assertive" role="status" id="events">
-<h2>event log</h2>
+<section class="messages" aria-live="assertive" role="status" aria-labelledby="event-log-title" id="events">
+<h2 id="event-log-title">event log</h2>
 <div id="eventList"><p>Nothing yet. Hit Attack or Steal to start comiting crimes!</p></div>
   </section>
   <nav class="actions" aria-label="Game actions" id="actionRow">
