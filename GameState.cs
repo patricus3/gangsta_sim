@@ -13,6 +13,7 @@ public static int killCount = 0;
 public static int playerHealth = 100;
 public static string currentGang = "None";
 public static int boneArmorDurability = 0;
+public static bool hasBrokenBoneArmor = false;
 
 public static List<Gang> gangs = new List<Gang>
 {

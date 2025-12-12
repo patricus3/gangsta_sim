@@ -17,4 +17,5 @@ void OnBankHeistStart();
 void OnGameSaved();
 void OnGameLoaded();
 void RegisterCustomContent();
+void OnCivilianDeath(string civilianType) { }
 }

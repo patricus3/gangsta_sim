@@ -1,11 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>    
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
-  <FileVersion>4.0.0.0</FileVersion>
-  <Version>4.0.0</Version>
+    <UseWPF>true</UseWPF>
+      <Company>Patricus Productions</Company>
+  <Version>4.1.0</Version>
+  <AssemblyVersion>4.1.0.2000</AssemblyVersion>
+  <FileVersion>4.1.0</FileVersion>
   </PropertyGroup>
-  </Project>
+
+  <ItemGroup>
+    <PackageReference Include="SpeechCore.CrossPlatform" Version="1.1.1" />
+  </ItemGroup>
+
+</Project>

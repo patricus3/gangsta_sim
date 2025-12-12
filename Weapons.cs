@@ -3,22 +3,56 @@ using System.Collections.Generic;
 
 static class Weapons
 {
-public static void EquipWeapon()
+public static string GetAvailableWeapons()
 {
-Console.WriteLine("\nYour weapons:");
-foreach (var item in GameState.inventory) if (GetWeaponDamage(item) > 0) Console.WriteLine(item);
-Console.Write("Which weapon do you want to equip? ");
-string? pick = Console.ReadLine();
-if (pick != null && GameState.inventory.Contains(pick) && GetWeaponDamage(pick) > 0)
+string result = "\nYour weapons:\n";
+List<string> availableWeapons = new List<string>();
+foreach (var item in GameState.inventory) 
 {
+    int damage = GetWeaponDamage(item);
+    if (damage > 0) 
+    {
+        availableWeapons.Add(item);
+        result += item + "\n";
+    }
+}
+
+if (availableWeapons.Count == 0)
+{
+result += "You don't have any weapons to equip!\n";
+}
+return result;
+}
+
+public static string EquipWeapon(string selectedWeapon)
+{
+GameState.equippedWeapon = selectedWeapon;
+ModLoader.OnWeaponEquipped(selectedWeapon);
+return $"You equip the {GameState.equippedWeapon}.\n";
+}
+
+public static string EquipWeapon()
+{
+string result = "\nYour weapons:\n";
+foreach (var item in GameState.inventory) if (GetWeaponDamage(item) > 0) result += item + "\n";
+
+// For GUI version, we'll simulate equipping a random weapon
+Random rand = new Random();
+List<string> availableWeapons = new List<string>();
+foreach (var item in GameState.inventory) if (GetWeaponDamage(item) > 0) availableWeapons.Add(item);
+
+if (availableWeapons.Count > 0)
+{
+string pick = availableWeapons[rand.Next(availableWeapons.Count)];
 GameState.equippedWeapon = pick;
 ModLoader.OnWeaponEquipped(pick);
-Console.WriteLine($"You equip the {GameState.equippedWeapon}.");
+result += $"You equip the {GameState.equippedWeapon}.\n";
 }
 else
 {
-Console.WriteLine("You don't have that weapon!");
+result += "You don't have any weapons to equip!\n";
 }
+return result;
 }
 
 public static int GetWeaponDamage(string weapon)
